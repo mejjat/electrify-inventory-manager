@@ -3,7 +3,7 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { InventoryCard } from "@/components/inventory/InventoryCard";
 import { AddItemDialog } from "@/components/inventory/AddItemDialog";
 import { AdvancedFilters } from "@/components/inventory/AdvancedFilters";
-import { Package, AlertTriangle, BarChart3 } from "lucide-react";
+import { Package, AlertTriangle, BarChart3, Heart } from "lucide-react";
 import { Category } from "@/constants/categories";
 
 interface InventoryItem {
@@ -103,8 +103,8 @@ const Index = () => {
   const categories = new Set(inventory.map((item) => item.category)).size;
 
   return (
-    <div className="container py-8 animate-fade-in bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="flex flex-col gap-8">
+    <div className="container py-8 animate-fade-in bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen flex flex-col">
+      <div className="flex flex-col gap-8 flex-grow">
         <div className="flex items-center justify-between">
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">
             StockElec155
@@ -155,6 +155,10 @@ const Index = () => {
           )}
         </div>
       </div>
+      
+      <footer className="mt-8 py-4 text-center text-sm text-gray-600 flex items-center justify-center gap-1">
+        Made with <Heart className="h-4 w-4 text-red-500 fill-current" /> by MEJJAT
+      </footer>
     </div>
   );
 };
