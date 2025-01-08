@@ -11,6 +11,27 @@ interface FiltersProps {
   }) => void;
 }
 
+const categories = [
+  "capteur",
+  "switch",
+  "bobine",
+  "solenoide",
+  "bouton poussoire",
+  "demarreur",
+  "alternateur",
+  "lampe",
+  "parabole",
+  "klaxon",
+  "avertisseur MA",
+  "fusible",
+  "cable",
+  "cosse +",
+  "cosse -",
+  "ecm",
+  "tableau",
+  "divers"
+];
+
 export function AdvancedFilters({ onFilterChange }: FiltersProps) {
   return (
     <Card className="glass-card mb-6">
@@ -42,9 +63,11 @@ export function AdvancedFilters({ onFilterChange }: FiltersProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="cables">Cables</SelectItem>
-                <SelectItem value="connectors">Connectors</SelectItem>
-                <SelectItem value="resistors">Resistors</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

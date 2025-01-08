@@ -2,9 +2,8 @@ import { useState } from "react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { InventoryCard } from "@/components/inventory/InventoryCard";
 import { AddItemDialog } from "@/components/inventory/AddItemDialog";
-import { StockMovementHistory } from "@/components/inventory/StockMovementHistory";
 import { AdvancedFilters } from "@/components/inventory/AdvancedFilters";
-import { Package, AlertTriangle, BarChart3, TrendingUp } from "lucide-react";
+import { Package, AlertTriangle, BarChart3 } from "lucide-react";
 
 interface InventoryItem {
   id: string;
@@ -23,30 +22,25 @@ const Index = () => {
     stockLevel: "",
   });
 
-  // Mock stock movements data
-  const mockMovements = [
-    {
-      id: "1",
-      type: "in" as const,
-      quantity: 50,
-      date: new Date().toISOString(),
-      itemName: "Cable Type A",
-    },
-    {
-      id: "2",
-      type: "out" as const,
-      quantity: 20,
-      date: new Date().toISOString(),
-      itemName: "Resistor 10k",
-    },
-  ];
-
   const handleAddItem = (item: Omit<InventoryItem, "id">) => {
-    const newItem = {
-      ...item,
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    setInventory([...inventory, newItem]);
+    // Check if reference already exists
+    const existingItem = inventory.find((i) => i.reference === item.reference);
+    if (existingItem) {
+      // Update quantity of existing item
+      const updatedInventory = inventory.map((i) =>
+        i.reference === item.reference
+          ? { ...i, quantity: i.quantity + item.quantity }
+          : i
+      );
+      setInventory(updatedInventory);
+    } else {
+      // Add new item
+      const newItem = {
+        ...item,
+        id: Math.random().toString(36).substr(2, 9),
+      };
+      setInventory([...inventory, newItem]);
+    }
   };
 
   const handleEditItem = (id: string) => {
@@ -103,7 +97,7 @@ const Index = () => {
           <AddItemDialog onAdd={handleAddItem} inventory={inventory} />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           <StatsCard
             title="Total Items"
             value={totalItems}
@@ -119,38 +113,26 @@ const Index = () => {
             value={categories}
             icon={<BarChart3 className="h-4 w-4" />}
           />
-          <StatsCard
-            title="Stock Value"
-            value="$12,345"
-            icon={<TrendingUp className="h-4 w-4" />}
-          />
         </div>
 
         <AdvancedFilters onFilterChange={handleFilterChange} />
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="grid gap-4 md:grid-cols-2">
-              {filteredInventory.map((item) => (
-                <InventoryCard
-                  key={item.id}
-                  item={item}
-                  onEdit={handleEditItem}
-                  onDelete={handleDeleteItem}
-                />
-              ))}
-              {filteredInventory.length === 0 && (
-                <div className="col-span-full text-center py-12 text-muted-foreground glass-card rounded-lg">
-                  {inventory.length === 0
-                    ? "No items in inventory. Add some items to get started!"
-                    : "No items match your search."}
-                </div>
-              )}
+        <div className="grid gap-4 md:grid-cols-2">
+          {filteredInventory.map((item) => (
+            <InventoryCard
+              key={item.id}
+              item={item}
+              onEdit={handleEditItem}
+              onDelete={handleDeleteItem}
+            />
+          ))}
+          {filteredInventory.length === 0 && (
+            <div className="col-span-full text-center py-12 text-muted-foreground glass-card rounded-lg">
+              {inventory.length === 0
+                ? "No items in inventory. Add some items to get started!"
+                : "No items match your search."}
             </div>
-          </div>
-          <div className="lg:col-span-1">
-            <StockMovementHistory movements={mockMovements} />
-          </div>
+          )}
         </div>
       </div>
     </div>
