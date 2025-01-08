@@ -4,13 +4,14 @@ import { InventoryCard } from "@/components/inventory/InventoryCard";
 import { AddItemDialog } from "@/components/inventory/AddItemDialog";
 import { AdvancedFilters } from "@/components/inventory/AdvancedFilters";
 import { Package, AlertTriangle, BarChart3 } from "lucide-react";
+import { Category } from "@/constants/categories";
 
 interface InventoryItem {
   id: string;
   name: string;
   quantity: number;
   minQuantity: number;
-  category: string;
+  category: Category;
   reference: string;
 }
 

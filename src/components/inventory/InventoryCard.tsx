@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, Edit, Trash2 } from "lucide-react";
+import { Category } from "@/constants/categories";
 
 interface InventoryCardProps {
   item: {
@@ -9,7 +10,7 @@ interface InventoryCardProps {
     name: string;
     quantity: number;
     minQuantity: number;
-    category: string;
+    category: Category;
     reference: string;
   };
   onEdit: (id: string) => void;
