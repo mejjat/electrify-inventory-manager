@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, FileDown, QrCode, PenLine } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { generateInventoryPDF } from "@/utils/pdfGenerator";
@@ -39,9 +39,18 @@ interface AddItemDialogProps {
     category: Category;
     reference: string;
   }>;
+  editingItem?: {
+    id: string;
+    name: string;
+    quantity: number;
+    minQuantity: number;
+    category: Category;
+    reference: string;
+  } | null;
+  onCancel?: () => void;
 }
 
-export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
+export function AddItemDialog({ onAdd, inventory, editingItem, onCancel }: AddItemDialogProps) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"select" | "manual" | "scan">("select");
   const [formData, setFormData] = useState({
@@ -52,6 +61,20 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
     reference: "",
   });
 
+  useEffect(() => {
+    if (editingItem) {
+      setFormData({
+        name: editingItem.name,
+        quantity: editingItem.quantity.toString(),
+        minQuantity: editingItem.minQuantity.toString(),
+        category: editingItem.category,
+        reference: editingItem.reference,
+      });
+      setMode("manual");
+      setOpen(true);
+    }
+  }, [editingItem]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.quantity || !formData.reference) {
@@ -59,29 +82,15 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
       return;
     }
 
-    // Check for existing reference
-    const existingItem = inventory.find(
-      (item) => item.reference === formData.reference
-    );
+    onAdd({
+      name: formData.name,
+      quantity: Number(formData.quantity),
+      minQuantity: Number(formData.minQuantity) || 0,
+      category: formData.category,
+      reference: formData.reference,
+    });
 
-    if (existingItem) {
-      // Update quantity of existing item
-      onAdd({
-        ...existingItem,
-        quantity: existingItem.quantity + Number(formData.quantity),
-      });
-      toast.success("Quantity updated for existing item");
-    } else {
-      // Add new item
-      onAdd({
-        name: formData.name,
-        quantity: Number(formData.quantity),
-        minQuantity: Number(formData.minQuantity) || 0,
-        category: formData.category,
-        reference: formData.reference,
-      });
-      toast.success("Item added successfully");
-    }
+    toast.success(editingItem ? "Item updated successfully" : "Item added successfully");
 
     setFormData({
       name: "",
@@ -92,6 +101,21 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
     });
     setMode("select");
     setOpen(false);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setMode("select");
+    setFormData({
+      name: "",
+      quantity: "",
+      minQuantity: "",
+      category: CATEGORIES[0],
+      reference: "",
+    });
+    if (editingItem && onCancel) {
+      onCancel();
+    }
   };
 
   const handleScan = (result: string) => {
@@ -120,22 +144,27 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
 
   return (
     <div className="flex gap-2">
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleClose}>
         <DialogTrigger asChild>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Item
-          </Button>
+          {!editingItem && (
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Item
+            </Button>
+          )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add New Item</DialogTitle>
+            <DialogTitle>{editingItem ? "Edit Item" : "Add New Item"}</DialogTitle>
             <DialogDescription>
-              Choose how you want to add a new item to your inventory
+              {editingItem 
+                ? "Edit the details of your inventory item"
+                : "Choose how you want to add a new item to your inventory"
+              }
             </DialogDescription>
           </DialogHeader>
 
-          {mode === "select" && (
+          {mode === "select" && !editingItem && (
             <div className="grid grid-cols-2 gap-4">
               <Button
                 variant="outline"
@@ -243,12 +272,12 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
                   type="button"
                   variant="outline"
                   className="flex-1"
-                  onClick={() => setMode("select")}
+                  onClick={handleClose}
                 >
-                  Back
+                  Cancel
                 </Button>
                 <Button type="submit" className="flex-1">
-                  Add Item
+                  {editingItem ? "Save Changes" : "Add Item"}
                 </Button>
               </div>
             </form>

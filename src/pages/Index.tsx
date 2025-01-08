@@ -22,31 +22,45 @@ const Index = () => {
     category: "",
     stockLevel: "",
   });
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
   const handleAddItem = (item: Omit<InventoryItem, "id">) => {
-    // Check if reference already exists
-    const existingItem = inventory.find((i) => i.reference === item.reference);
-    if (existingItem) {
-      // Update quantity of existing item
+    if (editingItem) {
+      // Update existing item
       const updatedInventory = inventory.map((i) =>
-        i.reference === item.reference
-          ? { ...i, quantity: i.quantity + item.quantity }
+        i.id === editingItem.id
+          ? { ...i, ...item }
           : i
       );
       setInventory(updatedInventory);
+      setEditingItem(null);
     } else {
-      // Add new item
-      const newItem = {
-        ...item,
-        id: Math.random().toString(36).substr(2, 9),
-      };
-      setInventory([...inventory, newItem]);
+      // Check if reference already exists
+      const existingItem = inventory.find((i) => i.reference === item.reference);
+      if (existingItem) {
+        // Update quantity of existing item
+        const updatedInventory = inventory.map((i) =>
+          i.reference === item.reference
+            ? { ...i, quantity: i.quantity + item.quantity }
+            : i
+        );
+        setInventory(updatedInventory);
+      } else {
+        // Add new item
+        const newItem = {
+          ...item,
+          id: Math.random().toString(36).substr(2, 9),
+        };
+        setInventory([...inventory, newItem]);
+      }
     }
   };
 
   const handleEditItem = (id: string) => {
-    // Implement edit functionality
-    console.log("Edit item:", id);
+    const itemToEdit = inventory.find((item) => item.id === id);
+    if (itemToEdit) {
+      setEditingItem(itemToEdit);
+    }
   };
 
   const handleDeleteItem = (id: string) => {
@@ -95,7 +109,12 @@ const Index = () => {
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">
             StockElec155
           </h1>
-          <AddItemDialog onAdd={handleAddItem} inventory={inventory} />
+          <AddItemDialog 
+            onAdd={handleAddItem} 
+            inventory={inventory} 
+            editingItem={editingItem}
+            onCancel={() => setEditingItem(null)}
+          />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
