@@ -9,11 +9,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, FileDown, QrCode, PenLine } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { generateInventoryPDF } from "@/utils/pdfGenerator";
+import { CATEGORIES } from "@/constants/categories";
 
 interface AddItemDialogProps {
   onAdd: (item: {
@@ -40,7 +48,7 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
     name: "",
     quantity: "",
     minQuantity: "",
-    category: "",
+    category: CATEGORIES[0],
     reference: "",
   });
 
@@ -51,24 +59,39 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
       return;
     }
 
-    onAdd({
-      name: formData.name,
-      quantity: Number(formData.quantity),
-      minQuantity: Number(formData.minQuantity) || 0,
-      category: formData.category || "Uncategorized",
-      reference: formData.reference,
-    });
+    // Check for existing reference
+    const existingItem = inventory.find(
+      (item) => item.reference === formData.reference
+    );
+
+    if (existingItem) {
+      // Update quantity of existing item
+      onAdd({
+        ...existingItem,
+        quantity: existingItem.quantity + Number(formData.quantity),
+      });
+      toast.success("Quantity updated for existing item");
+    } else {
+      // Add new item
+      onAdd({
+        name: formData.name,
+        quantity: Number(formData.quantity),
+        minQuantity: Number(formData.minQuantity) || 0,
+        category: formData.category,
+        reference: formData.reference,
+      });
+      toast.success("Item added successfully");
+    }
 
     setFormData({
       name: "",
       quantity: "",
       minQuantity: "",
-      category: "",
+      category: CATEGORIES[0],
       reference: "",
     });
     setMode("select");
     setOpen(false);
-    toast.success("Item added successfully");
   };
 
   const handleScan = (result: string) => {
@@ -197,14 +220,23 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
+                <Select
                   value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category: value })
                   }
-                  placeholder="Uncategorized"
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex gap-2">
                 <Button
