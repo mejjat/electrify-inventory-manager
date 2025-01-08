@@ -53,7 +53,7 @@ const Index = () => {
       <div className="flex flex-col gap-8">
         <div className="flex items-center justify-between">
           <h1 className="text-4xl font-bold">StockElec</h1>
-          <AddItemDialog onAdd={handleAddItem} />
+          <AddItemDialog onAdd={handleAddItem} inventory={inventory} />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
