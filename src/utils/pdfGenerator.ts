@@ -71,7 +71,7 @@ export const generateInventoryPDF = (inventory: InventoryItem[]) => {
   });
 
   // Add footer
-  const pageCount = doc.internal.getNumberOfPages();
+  const pageCount = (doc as any).internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setTextColor(156, 163, 175);

@@ -21,14 +21,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { generateInventoryPDF } from "@/utils/pdfGenerator";
-import { CATEGORIES } from "@/constants/categories";
+import { CATEGORIES, Category } from "@/constants/categories";
 
 interface AddItemDialogProps {
   onAdd: (item: {
     name: string;
     quantity: number;
     minQuantity: number;
-    category: string;
+    category: Category;
     reference: string;
   }) => void;
   inventory: Array<{
@@ -36,7 +36,7 @@ interface AddItemDialogProps {
     name: string;
     quantity: number;
     minQuantity: number;
-    category: string;
+    category: Category;
     reference: string;
   }>;
 }
@@ -48,7 +48,7 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
     name: "",
     quantity: "",
     minQuantity: "",
-    category: CATEGORIES[0],
+    category: CATEGORIES[0] as Category,
     reference: "",
   });
 
@@ -222,7 +222,7 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value) =>
+                  onValueChange={(value: Category) =>
                     setFormData({ ...formData, category: value })
                   }
                 >
