@@ -144,7 +144,7 @@ export function AddItemDialog({ onAdd, inventory, editingItem, onCancel }: AddIt
 
   return (
     <div className="flex gap-2">
-      <Dialog open={open} onOpenChange={handleClose}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           {!editingItem && (
             <Button className="gap-2">
