@@ -13,7 +13,7 @@ import { Plus, FileDown, QrCode, PenLine } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { BarcodeScanner } from "./BarcodeScanner";
-import jsPDF from "jspdf";
+import { generateInventoryPDF } from "@/utils/pdfGenerator";
 
 interface AddItemDialogProps {
   onAdd: (item: {
@@ -73,14 +73,12 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
 
   const handleScan = (result: string) => {
     try {
-      // This is a simple example - in reality, you'd want to parse the barcode
-      // according to your specific barcode format
       setFormData({
         ...formData,
         reference: result,
       });
       toast.success("Barcode scanned successfully");
-      setMode("manual"); // Switch to manual mode to complete other fields
+      setMode("manual");
     } catch (error) {
       toast.error("Invalid barcode format");
     }
@@ -92,41 +90,7 @@ export function AddItemDialog({ onAdd, inventory }: AddItemDialogProps) {
   };
 
   const downloadInventoryPDF = () => {
-    const doc = new jsPDF();
-    let yPos = 20;
-
-    // Add title
-    doc.setFontSize(16);
-    doc.text("Inventory Report", 20, yPos);
-    yPos += 10;
-
-    // Add date
-    doc.setFontSize(12);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, yPos);
-    yPos += 20;
-
-    // Add table headers
-    doc.setFontSize(12);
-    doc.text("Name", 20, yPos);
-    doc.text("Quantity", 80, yPos);
-    doc.text("Reference", 120, yPos);
-    doc.text("Category", 160, yPos);
-    yPos += 10;
-
-    // Add items
-    doc.setFontSize(10);
-    inventory.forEach((item) => {
-      if (yPos > 280) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.text(item.name.substring(0, 25), 20, yPos);
-      doc.text(item.quantity.toString(), 80, yPos);
-      doc.text(item.reference.substring(0, 15), 120, yPos);
-      doc.text(item.category.substring(0, 15), 160, yPos);
-      yPos += 7;
-    });
-
+    const doc = generateInventoryPDF(inventory);
     doc.save("inventory-report.pdf");
     toast.success("PDF report downloaded successfully");
   };
